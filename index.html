@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Learnly App</title>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    </head>
+    <body>
+        <div id="app">
+            <header>
+                <!-- The top section-->
+                <h1>{{ sitename }}</h1>
+                <h4>Remarkable skills in small steps</h4>
+                <button>Show Cart ({{ cartItemCount }})</button>
+            </header>
+            <main>
+                <!-- The functional section (changes)-->
+                <div v-if="showCourses" class="coursesPage">
+                    <!-- Product Catalogue Page (showSubject loads this page) -->
+                    <h2>Current Course Collection </h2>
+                    
+                    <button @click="showCartPage" v-if="cartItemCount > 0">
+                        Go To Checkout
+                        <span class="fa-solid fa-cart-shopping"></span>
+                    </button>
+                    <button disabled="disabled" v-else>
+                        Go To Checkout
+                        <span class="fa-solid fa-cart-shopping"></span>
+                    </button>
+
+                    <div v-for="course in courses">
+                        <figure>
+                            <img v-bind:src="course.image">
+                        </figure>
+                        <h4>{{ course.title }}</h4>
+                        <p v-text="course.description"></p>
+                        <p><em>{{ course.location }}</em></p>
+                        <p>£ {{ course.price.toFixed(2) }}</p>
+                        <p>{{ course.spacesAvailable }} <em>spaces left</em></p>
+
+                        <div>
+                            <!-- Ratings -->
+                            <!-- <p>{{ course.rating }}</p> -->
+                            <span v-for="n in course.rating" :key="'filled-' + course.title + '-' + n">
+                                    <i class="fa-solid fa-star"></i>
+                            </span>
+                            <span v-for="n in 5-course.rating" :key="'empty-' + course.title + '-' + n">
+                                <i class="fa-regular fa-star"></i>
+                            </span>
+                        </div>
+
+                        <!-- Courses 'add to cart' button-->
+                        <button @click="addToCart(course)" v-if="canAddToCart(course)">Add to cart</button>
+                        <button disabled="disabled" v-else>Add to cart</button>
+
+                    </div>
+                </div>
+                <div v-else class="cartPage">
+                    <!-- Checkout Page -->
+                    <h2>Shopping Cart</h2>
+                    <p>Review your order before confirming</p>
+                    <button @click="showCoursePage">
+                    Back To Courses
+                    <span class="fa-solid fa-chalkboard"></span>
+                    </button>
+
+                    <div class="orderSummary"> 
+                        <h3>Order Summary</h3>
+                        <!-- Show this if the cart is empty -->
+                        <div v-if="cart.length === 0">
+                            <p>Your cart is empty.</p>
+                        </div>
+                        <div v-else>
+                           <table>
+                                <thead>
+                                    <th>Course</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="course in cart" :key="course.id">
+                                        <td>{{ course.title }}</td>
+                                        <td>£{{ course.price.toFixed(2) }}</td>
+                                        <td>{{ course.quantity }}</td>
+                                        <td>£{{ course.total.toFixed(2) }}</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="3">Total:</th>
+                                        <th>£{{ cartTotal.toFixed(2) }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table> 
+                        </div>
+                    </div>
+
+                    <div class="customerInfo">
+                        <p>
+                            <strong>First Name:</strong>
+                            <input v-model.trim="order.firstName"/>
+
+                            <p v-if="order.firstName && !isValidFirstName()" class="error">
+                                First name must contain letters only.
+                            </p>
+                        </p>
+                        <p>
+                            <strong>Last Name:</strong>
+                            <input v-model.trim="order.lastName"/>
+                        </p>
+                        <p>
+                            <strong>Phone Number (starting with country code):</strong>
+                            <input v-model.number="order.phone"/>
+                        </p>
+                        <p>
+                            <strong>Address:</strong>
+                            <input v-model="order.address"/>
+                        </p>
+                        <p>
+                            <strong>Zip/Postal Code:</strong>
+                            <input v-model.trim="order.postcode"/>
+                        </p>
+                        <p>
+                            <strong>Country:</strong>
+                            <select v-model="order.country">
+                                <option disabled value="">Select a Country</option>
+
+                                <option v-for="(country, index) in countries"
+                                        :key="index" :value="country">
+                                    {{ country }}
+                                </option>
+                            </select>
+                        </p>
+                        <!-- <p>
+                            <input type="checkbox" id="gift" value="true" v-model="order.gift"
+                            v-bind:true-value="order.sendGift"
+                            v-bind:false-value="order.dontSendGift"> 
+                            <label for="gift">Ship As A Gift</label>
+                        </p> -->
+                        <p>
+                            <input type="radio" id="bank" value="Bank/Credit Card" v-model="order.paymentMethod"> 
+                            <label for="bank">Bank/Credit Card</label>
+
+                            <input type="radio" id="gift" value="Gift Card" v-model="order.paymentMethod"> 
+                            <label for="gift">Gift Card</label>
+                        </p> 
+                    </div>
+
+                    <button @click="checkout" v-if="checkoutEnabled">Confirm Checkout</button>
+                    <button disabled="disabled">Confirm Checkout</button>
+
+                    <!-- Order Information -->
+                    <div class="orderInfo">
+                        <h2>Order Information</h2>
+                        <p>First Name: {{ order.firstName }}</p>
+                        <p>Last Name: {{ order.lastName }}</p>
+                        <p>Phone Number: {{ order.phone }}</p>
+                        <p>Address: {{ order.address }}</p>
+                        <p>Zip/Postcode: {{ order.postcode }}</p>
+                        <p>Country: {{ order.country }}</p>
+                        <p>Payment Method: {{ order.paymentMethod }}</p>
+                    </div>
+                
+                </div>
+            </main>
+        </div>
+
+        <!-- Js scripts-->
+        <script src="courses.js"></script>
+
+        <!-- Vue.js section -->
+        <script type="text/javascript">
+            var app = new Vue ({
+                el: '#app',
+                data: {
+                    sitename: "Learnly.",
+                    courses: courses,
+                    cart:[],
+                    showCourses: true,
+                    order: {
+                        firstName: '',
+                        lastName: '',
+                        // email: '',
+                        phone: '',
+                        address: '',
+                        postcode: '',
+                        country: '',
+                        paymentMethod: "Bank/Credit Card",
+                    },
+
+                    countries: [
+                        'United Kingdom',
+                        'United Arab Emirates',
+                        'Kenya',
+                        'United States',
+                        'Pakistan',
+                        'Australia',
+                        'India',
+                        'Nigeria',
+                        'South Africa'
+                    ],
+                    
+
+                },
+
+                methods: {
+                    showCartPage() {
+                        // this.showCourses = this.showCourses ? false : true;
+                        this.showCourses = false;
+                    },
+
+                    showCoursePage () {
+                        this.showCourses = true;
+                    },
+
+                    canAddToCart(course) {
+                        return course.spacesAvailable > 0;
+                    },
+
+                    isCourseInCart(course) {
+                        return this.cart.find(function(item) {
+                                return item.title === course.title;
+                            });
+                    },
+
+                    addToCart(course) {
+                        // this.cart.push(course.title);
+                        // // course.spacesAvailable--;
+                        // // alert('1' + course.title +'added to cart!')
+                        if (this.canAddToCart(course)) {
+                            
+                            let courseInCart = this.isCourseInCart(course);
+
+                            if (courseInCart) {
+                                courseInCart.quantity++;
+                                courseInCart.total = courseInCart.price * courseInCart.quantity;
+                            } else {
+                                this.cart.push({
+                                    title: course.title,
+                                    price: course.price,
+                                    quantity: 1,
+                                    total: course.price
+                                });
+                            }
+                            course.spacesAvailable--;
+                        }
+                        // console.log(this.cart);
+                        console.log(JSON.stringify(this.cart, null, 2));
+                    },
+
+                    isValidPhone () {
+                        const phoneOrder = /^[0-9]*$/;
+                        return phoneOrder.test(this.order.phone)
+                    },
+
+                    isValidFirstName() {
+                        const nameOrder = /^[A-Za-z-']+$/;
+                        return nameOrder.test(this.order.firstName);
+                    },
+
+                    isValidLastName() {
+                        const nameOrder = /^[A-Za-z-']+$/;
+                        return nameOrder.test(this.order.lastName);
+                    },
+
+                    isValidName() {
+                        return this.isValidFirstName && this.isValidLastName;
+                    },
+
+                    checkoutEnabled() {
+                        return isValidName && isValidPhone;
+                    },
+
+                    checkout () {
+                        alert("Checkout complete!");
+                        this.cart = [];
+                    }
+                },
+
+                computed: {
+                    cartItemCount() {
+                        const initialValue = 0;
+
+                        return this.cart.reduce(function(itemCount, course){
+                            return itemCount + course.quantity;
+                        }, initialValue);
+                    },
+
+                    cartTotal() {
+                        const initialTotal = 0;
+
+                        return this.cart.reduce(function(sumTotal, course){
+                            return sumTotal + course.total;
+                        }, initialTotal);
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
