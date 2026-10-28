@@ -5,92 +5,129 @@
         <title>Learnly App</title>
         <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+        <link rel="stylesheet" href="stylesheet.css">
     </head>
     <body>
         <div id="app">
-            <header>
-                <!-- The top section-->
-                <h1>{{ sitename }}</h1>
-                <h4>Remarkable skills in small steps</h4>
-                <button>Show Cart ({{ cartItemCount }})</button>
+            <header class="header">
+                <!-- <h1>{{ sitename }}</h1> -->
+                <img src="images/Learnly_logos/50p/1.png">
+                <h2>Remarkable skills in small steps</h2>
+                <!-- <button>Show Cart ({{ cartItemCount }})</button> -->
             </header>
             <main>
                 <!-- The functional section (changes)-->
                 <div v-if="showCourses" class="coursesPage">
                     <!-- Product Catalogue Page (showSubject loads this page) -->
-                    <h2>Current Course Collection </h2>
-                    
-                    <button @click="showCartPage" v-if="cartItemCount > 0">
-                        Go To Checkout
-                        <span class="fa-solid fa-cart-shopping"></span>
-                    </button>
-                    <button disabled="disabled" v-else>
-                        Go To Checkout
-                        <span class="fa-solid fa-cart-shopping"></span>
-                    </button>
+                    <div class="pageTitleContainer">
+                        <h2>Current Course Collection </h2>
+                        
+                        <button @click="showCartPage" v-if="cartItemCount > 0">
+                            <div class="cartIcon">
+                                <span class="cart-count">{{ cartItemCount }}</span>
+                                <span class="fa-solid fa-cart-shopping"></span>
+                            </div>
+                            Go To Cart
+                        </button>
+                        <button disabled="disabled" v-else>
+                            <div class="cartIcon">
+                                <span class="cart-count">{{ cartItemCount }}</span>
+                                <span class="fa-solid fa-cart-shopping"></span>
+                            </div>
+                            Go To Cart
+                        </button>
+                    </div>
+                    <!-- Sorting functionality-->
+                    <div class="sortControls">
+                        <label for="sortAttribute">Sort by:</label>
+                        
+                        <select id="sortAttribute" v-model="sortAttribute">
+                            <option disabled value="">Default</option>
+                            <option value="title">Course Title</option>
+                            <option value="location">Location</option>
+                            <option value="price">Price</option>
+                            <option value="spacesAvailable">Available Spaces</option>
+                            <option value="rating">Rating</option>
+                        </select>
 
-                    <div v-for="course in courses">
-                        <figure>
-                            <img v-bind:src="course.image">
-                        </figure>
-                        <h4>{{ course.title }}</h4>
-                        <p v-text="course.description"></p>
-                        <p><em>{{ course.location }}</em></p>
-                        <p>£ {{ course.price.toFixed(2) }}</p>
-                        <p>{{ course.spacesAvailable }} <em>spaces left</em></p>
+                        <label for="sortDirection">Order:</label>
 
+                        <select id="sortDirection" v-model="sortDirection">
+                            <option value="ascending">Ascending</option>
+                            <option value="descending">Descending</option>
+                        </select>
+
+                        <button @click="sortCourses(sortAttribute, sortDirection)">Sort</button>
+                        <button @click="resetSort">Reset Sort</button>
+                    </div>
+
+                    <div class="courses" v-for="course in displayedCourses" :key="course.title">
                         <div>
-                            <!-- Ratings -->
-                            <!-- <p>{{ course.rating }}</p> -->
-                            <span v-for="n in course.rating" :key="'filled-' + course.title + '-' + n">
-                                    <i class="fa-solid fa-star"></i>
-                            </span>
-                            <span v-for="n in 5-course.rating" :key="'empty-' + course.title + '-' + n">
-                                <i class="fa-regular fa-star"></i>
-                            </span>
+                            <figure>
+                                <img v-bind:src="course.image">
+                            </figure>
+                            <h4>{{ course.title }}</h4>
+                            <p v-text="course.description"></p>
+                            <p><em>{{ course.location }}</em></p>
+                            <p>£ {{ course.price.toFixed(2) }}</p>
+                            <p>{{ course.spacesAvailable }} <em>space(s) left</em></p>
+
+                            <div>
+                                <!-- Ratings -->
+                                <span v-for="n in course.rating" :key="'filled-' + course.title + '-' + n">
+                                        <i class="fa-solid fa-star"></i>
+                                </span>
+                                <span v-for="n in 5-course.rating" :key="'empty-' + course.title + '-' + n">
+                                    <i class="fa-regular fa-star"></i>
+                                </span>
+                            </div>
+
+                            <!-- Courses 'add to cart' button-->
+                            <button @click="addToCart(course)" v-if="canAddToCart(course)">Add to cart</button>
+                            <button disabled="disabled" v-else>Add to cart</button>
+
                         </div>
-
-                        <!-- Courses 'add to cart' button-->
-                        <button @click="addToCart(course)" v-if="canAddToCart(course)">Add to cart</button>
-                        <button disabled="disabled" v-else>Add to cart</button>
-
                     </div>
                 </div>
+
                 <div v-else class="cartPage">
                     <!-- Checkout Page -->
-                    <h2>Shopping Cart</h2>
-                    <p>Review your order before confirming</p>
-                    <button @click="showCoursePage">
-                    Back To Courses
-                    <span class="fa-solid fa-chalkboard"></span>
-                    </button>
-
+                    <div class="pageTitleContainer">
+                        <h2>Shopping Cart</h2>
+                        <p>Review your order before confirming</p>
+                        <button @click="showCoursePage">
+                        Back To Courses
+                        <span class="fa-solid fa-chalkboard"></span>
+                        </button>
+                    </div>
+                    <!-- Order Summary -->
                     <div class="orderSummary"> 
                         <h3>Order Summary</h3>
-                        <!-- Show this if the cart is empty -->
-                        <div v-if="cart.length === 0">
-                            <p>Your cart is empty.</p>
-                        </div>
-                        <div v-else>
+                        <div>
                            <table>
                                 <thead>
                                     <th>Course</th>
                                     <th>Price</th>
                                     <th>Quantity</th>
                                     <th>Total</th>
+                                    <th></th>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="course in cart" :key="course.id">
+                                    <tr v-for="course in cart" :key="course.title">
                                         <td>{{ course.title }}</td>
                                         <td>£{{ course.price.toFixed(2) }}</td>
                                         <td>{{ course.quantity }}</td>
                                         <td>£{{ course.total.toFixed(2) }}</td>
+                                        <td>
+                                            <button @click="removeFromCart(course)">Remove from cart</button>
+                                        </td>
                                     </tr>
                                 </tbody>
                                 <tfoot>
                                     <tr>
                                         <th colspan="3">Total:</th>
                                         <th>£{{ cartTotal.toFixed(2) }}</th>
+                                        <th></th>
                                     </tr>
                                 </tfoot>
                             </table> 
@@ -103,16 +140,24 @@
                             <input v-model.trim="order.firstName"/>
 
                             <p v-if="order.firstName && !isValidFirstName()" class="error">
-                                First name must contain letters only.
+                                First name must contain letters, hyphens and apostrophes only.
                             </p>
                         </p>
                         <p>
                             <strong>Last Name:</strong>
                             <input v-model.trim="order.lastName"/>
+
+                            <p v-if="order.lastName && !isValidLastName()" class="error">
+                                Last name must contain letters, hyphens and apostrophes only.
+                            </p>
                         </p>
                         <p>
                             <strong>Phone Number (starting with country code):</strong>
-                            <input v-model.number="order.phone"/>
+                            <input v-model="order.phone"/>
+
+                            <p v-if="order.phone && !isValidPhone()" class="error">
+                                Your phone number must contain numbers only.
+                            </p>
                         </p>
                         <p>
                             <strong>Address:</strong>
@@ -133,12 +178,6 @@
                                 </option>
                             </select>
                         </p>
-                        <!-- <p>
-                            <input type="checkbox" id="gift" value="true" v-model="order.gift"
-                            v-bind:true-value="order.sendGift"
-                            v-bind:false-value="order.dontSendGift"> 
-                            <label for="gift">Ship As A Gift</label>
-                        </p> -->
                         <p>
                             <input type="radio" id="bank" value="Bank/Credit Card" v-model="order.paymentMethod"> 
                             <label for="bank">Bank/Credit Card</label>
@@ -149,7 +188,7 @@
                     </div>
 
                     <button @click="checkout" v-if="checkoutEnabled">Confirm Checkout</button>
-                    <button disabled="disabled">Confirm Checkout</button>
+                    <button disabled="hidden" v-else>Confirm Checkout</button>
 
                     <!-- Order Information -->
                     <div class="orderInfo">
@@ -162,7 +201,6 @@
                         <p>Country: {{ order.country }}</p>
                         <p>Payment Method: {{ order.paymentMethod }}</p>
                     </div>
-                
                 </div>
             </main>
         </div>
@@ -189,7 +227,6 @@
                         country: '',
                         paymentMethod: "Bank/Credit Card",
                     },
-
                     countries: [
                         'United Kingdom',
                         'United Arab Emirates',
@@ -201,14 +238,17 @@
                         'Nigeria',
                         'South Africa'
                     ],
-                    
+                    displayedCourses: courses.slice(0),
+                    sortAttribute: "rating",
+                    sortDirection: "descending",
+                   
 
                 },
 
                 methods: {
                     showCartPage() {
-                        // this.showCourses = this.showCourses ? false : true;
-                        this.showCourses = false;
+                        this.showCourses = this.showCourses ? false : true;
+                        // this.showCourses = false;
                     },
 
                     showCoursePage () {
@@ -226,9 +266,6 @@
                     },
 
                     addToCart(course) {
-                        // this.cart.push(course.title);
-                        // // course.spacesAvailable--;
-                        // // alert('1' + course.title +'added to cart!')
                         if (this.canAddToCart(course)) {
                             
                             let courseInCart = this.isCourseInCart(course);
@@ -251,7 +288,7 @@
                     },
 
                     isValidPhone () {
-                        const phoneOrder = /^[0-9]*$/;
+                        const phoneOrder = /^[0-9]+$/;
                         return phoneOrder.test(this.order.phone)
                     },
 
@@ -266,17 +303,90 @@
                     },
 
                     isValidName() {
-                        return this.isValidFirstName && this.isValidLastName;
+                        return this.isValidFirstName() && this.isValidLastName();
                     },
 
-                    checkoutEnabled() {
-                        return isValidName && isValidPhone;
-                    },
+                    // checkoutEnabled() {
+                    //     return this.isValidName() && this.isValidPhone();
+                    // },
 
                     checkout () {
                         alert("Checkout complete!");
                         this.cart = [];
-                    }
+                        this.showCourses = true;
+                    },
+
+                    sortCourses(attr, dir) {
+                        this.sortAttribute = attr;
+                        this.sortDirection = dir;
+
+                        let coursesArray = this.courses.slice(0);
+
+                        function compare (a,b) {
+                            let valueA;
+                            let valueB;
+
+                            switch(attr) {
+                                case "title":
+                                    valueA = a.title;
+                                    valueB = b.title;
+                                    break;
+                                
+                                case "location":
+                                    valueA = a.location;
+                                    valueB = b.location;
+                                    break;
+
+                                case "price":
+                                    valueA = a.price;
+                                    valueB = b.price;
+                                    break;
+
+                                case "spacesAvailable":
+                                    valueA = a.spacesAvailable;
+                                    valueB = b.spacesAvailable;
+                                    break;
+                                
+                                case "rating":
+                                    valueA = a.rating;
+                                    valueB = b.rating;
+                                    break;
+                            }
+
+                            if (valueA > valueB) {
+                                return dir === "ascending" ? 1 : -1;
+                            }
+
+                            if (valueA < valueB) {
+                                return dir === "ascending" ? -1 : 1;
+                            }
+                            return 0;
+                        }
+                        this.displayedCourses = coursesArray.sort(compare);
+                    },
+
+                    resetSort() {
+                        this.displayedCourses = this.courses.slice(0);
+                        this.sortAttribute = "rating";
+                        this.sortDirection = "descending";
+                    },
+
+                    removeFromCart(course) {
+                        let courseInCart = this.isCourseInCart(course);
+
+                        if (courseInCart) {
+                            let courseInMainList = this.courses.find(
+                                function(sub) {
+                                    return sub.title === courseInCart.title;
+                            });
+                            courseInMainList.spacesAvailable += courseInCart.quantity;
+
+                            let cartIndex = this.cart.indexOf(courseInCart);
+                            this.cart.splice(cartIndex, 1);
+                        }
+                        
+                        console.log(JSON.stringify(this.cart, null, 2));
+                    },
                 },
 
                 computed: {
@@ -294,7 +404,12 @@
                         return this.cart.reduce(function(sumTotal, course){
                             return sumTotal + course.total;
                         }, initialTotal);
-                    }
+                    },
+
+                    checkoutEnabled() {
+                        return this.isValidName() && this.isValidPhone();
+                    },
+
                 }
             });
         </script>

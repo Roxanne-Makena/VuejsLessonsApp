@@ -1,0 +1,56 @@
+/* Default Styling across the website*/
+body {
+  font-family: 'Roboto', sans-serif;
+  color: #172d38;
+  background-color: #ffffff;
+  width: 99%;
+}
+
+.header {
+    background-color: #243b48;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.header h2 {
+    color: #81d3bb;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-style: oblique;
+}
+
+.pageTitleContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pageTitleContainer h2 {
+    color: #5fac95;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: 30px;
+}
+
+.pageTitleContainer button {
+    color: #ffffff;
+    background-color: #243b48;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 20px;
+}
+
+/* .cartIcon{
+    padding: 5px;
+} */
+
+/* .coursesPage {
+    /* display: flex;
+    flex-direction: column;
+} */
+
+.courses {
+    display: flex;
+    direction: column;
+}
