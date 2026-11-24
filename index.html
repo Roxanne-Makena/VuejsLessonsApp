@@ -10,10 +10,8 @@
     <body>
         <div id="app">
             <header class="header">
-                <!-- <h1>{{ sitename }}</h1> -->
-                <img src="images/Learnly_logos/50p/1.png">
+                <img src="images/Learnly_logo/1.png">
                 <h2>Remarkable skills in small steps</h2>
-                <!-- <button>Show Cart ({{ cartItemCount }})</button> -->
             </header>
             <main>
                 <!-- The functional section (changes)-->
@@ -63,13 +61,14 @@
 
                     <div class="courses" v-for="course in displayedCourses" :key="course.title">
                         <div>
+                            <!-- Individual Course Card -->
                             <figure>
                                 <img v-bind:src="course.image">
                             </figure>
                             <h4>{{ course.title }}</h4>
                             <p v-text="course.description"></p>
-                            <p><em>{{ course.location }}</em></p>
-                            <p>£ {{ course.price.toFixed(2) }}</p>
+                            <p><strong>Location:</strong> <em>{{ course.location }}</em></p>
+                            <p><strong>Price:</strong>  £ {{ course.price.toFixed(2) }}</p>
                             <p>{{ course.spacesAvailable }} <em>space(s) left</em></p>
 
                             <div>
@@ -85,7 +84,9 @@
                             <!-- Courses 'add to cart' button-->
                             <button @click="addToCart(course)" v-if="canAddToCart(course)">Add to cart</button>
                             <button disabled="disabled" v-else>Add to cart</button>
-
+                            <p v-if="course.spacesAvailable > 0 && course.spacesAvailable < 3" class="lowStock">
+                                Only {{ course.spacesAvailable }} left!
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -106,16 +107,28 @@
                         <div>
                            <table>
                                 <thead>
-                                    <th>Course</th>
-                                    <th>Price</th>
+                                    <th></th>
+                                    <th>Course Title</th>
+                                    <th>Description</th>
+                                    <th>Location</th>
+                                    <th>Unit Price</th>
+                                    <th>Spaces Available</th>
+                                    <th>Rating</th>
                                     <th>Quantity</th>
-                                    <th>Total</th>
+                                    <th>Total Price</th>
                                     <th></th>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="course in cart" :key="course.title">
+                                    <tr v-for="course in cart" :key="course.id">
+                                        <td>
+                                            <img v-bind:src="course.image">
+                                        </td>
                                         <td>{{ course.title }}</td>
+                                        <td>{{ course.description }}</td>
+                                        <td>{{ course.location }}</td>
                                         <td>£{{ course.price.toFixed(2) }}</td>
+                                        <td>{{ course.spacesAvailable }}</td>
+                                        <td>{{ course.rating }} /5</td>
                                         <td>{{ course.quantity }}</td>
                                         <td>£{{ course.total.toFixed(2) }}</td>
                                         <td>
@@ -125,7 +138,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th colspan="3">Total:</th>
+                                        <th colspan="8">Total:</th>
                                         <th>£{{ cartTotal.toFixed(2) }}</th>
                                         <th></th>
                                     </tr>
@@ -137,39 +150,39 @@
                     <div class="customerInfo">
                         <p>
                             <strong>First Name:</strong>
-                            <input v-model.trim="order.firstName"/>
+                            <input v-model.trim="customerDetails.firstName"/>
 
-                            <p v-if="order.firstName && !isValidFirstName()" class="error">
+                            <p v-if="customerDetails.firstName && !isValidFirstName()" class="error">
                                 First name must contain letters, hyphens and apostrophes only.
                             </p>
                         </p>
                         <p>
                             <strong>Last Name:</strong>
-                            <input v-model.trim="order.lastName"/>
+                            <input v-model.trim="customerDetails.lastName"/>
 
-                            <p v-if="order.lastName && !isValidLastName()" class="error">
+                            <p v-if="customerDetails.lastName && !isValidLastName()" class="error">
                                 Last name must contain letters, hyphens and apostrophes only.
                             </p>
                         </p>
                         <p>
                             <strong>Phone Number (starting with country code):</strong>
-                            <input v-model="order.phone"/>
+                            <input v-model="customerDetails.phone"/>
 
-                            <p v-if="order.phone && !isValidPhone()" class="error">
-                                Your phone number must contain numbers only.
+                            <p v-if="customerDetails.phone && !isValidPhone()" class="error">
+                                Your phone number must contain numbers only. Include the appropriate country code.
                             </p>
                         </p>
                         <p>
                             <strong>Address:</strong>
-                            <input v-model="order.address"/>
+                            <input v-model="customerDetails.address"/>
                         </p>
                         <p>
                             <strong>Zip/Postal Code:</strong>
-                            <input v-model.trim="order.postcode"/>
+                            <input v-model.trim="customerDetails.postcode"/>
                         </p>
                         <p>
                             <strong>Country:</strong>
-                            <select v-model="order.country">
+                            <select v-model="customerDetails.country">
                                 <option disabled value="">Select a Country</option>
 
                                 <option v-for="(country, index) in countries"
@@ -179,10 +192,10 @@
                             </select>
                         </p>
                         <p>
-                            <input type="radio" id="bank" value="Bank/Credit Card" v-model="order.paymentMethod"> 
+                            <input type="radio" id="bank" value="Bank/Credit Card" v-model="customerDetails.paymentMethod"> 
                             <label for="bank">Bank/Credit Card</label>
 
-                            <input type="radio" id="gift" value="Gift Card" v-model="order.paymentMethod"> 
+                            <input type="radio" id="gift" value="Gift Card" v-model="customerDetails.paymentMethod"> 
                             <label for="gift">Gift Card</label>
                         </p> 
                     </div>
@@ -192,14 +205,14 @@
 
                     <!-- Order Information -->
                     <div class="orderInfo">
-                        <h2>Order Information</h2>
-                        <p>First Name: {{ order.firstName }}</p>
-                        <p>Last Name: {{ order.lastName }}</p>
-                        <p>Phone Number: {{ order.phone }}</p>
-                        <p>Address: {{ order.address }}</p>
-                        <p>Zip/Postcode: {{ order.postcode }}</p>
-                        <p>Country: {{ order.country }}</p>
-                        <p>Payment Method: {{ order.paymentMethod }}</p>
+                        <h2>Customer Details</h2>
+                        <p>First Name: {{ customerDetails.firstName }}</p>
+                        <p>Last Name: {{ customerDetails.lastName }}</p>
+                        <p>Phone Number: {{ customerDetails.phone }}</p>
+                        <p>Address: {{ customerDetails.address }}</p>
+                        <p>Zip/Postcode: {{ customerDetails.postcode }}</p>
+                        <p>Country: {{ customerDetails.country }}</p>
+                        <p>Payment Method: {{ customerDetails.paymentMethod }}</p>
                     </div>
                 </div>
             </main>
@@ -217,10 +230,9 @@
                     courses: courses,
                     cart:[],
                     showCourses: true,
-                    order: {
+                    customerDetails: {
                         firstName: '',
                         lastName: '',
-                        // email: '',
                         phone: '',
                         address: '',
                         postcode: '',
@@ -240,9 +252,7 @@
                     ],
                     displayedCourses: courses.slice(0),
                     sortAttribute: "rating",
-                    sortDirection: "descending",
-                   
-
+                    sortDirection: "descending",   
                 },
 
                 methods: {
@@ -261,7 +271,7 @@
 
                     isCourseInCart(course) {
                         return this.cart.find(function(item) {
-                                return item.title === course.title;
+                                return item.id === course.id;
                             });
                     },
 
@@ -275,8 +285,14 @@
                                 courseInCart.total = courseInCart.price * courseInCart.quantity;
                             } else {
                                 this.cart.push({
+                                    id: course.id,
+                                    image: course.image,
                                     title: course.title,
+                                    description: course.description,
+                                    location: course.location,
                                     price: course.price,
+                                    spacesAvailable: course.spacesAvailable,
+                                    rating: course.rating,
                                     quantity: 1,
                                     total: course.price
                                 });
@@ -289,26 +305,23 @@
 
                     isValidPhone () {
                         const phoneOrder = /^[0-9]+$/;
-                        return phoneOrder.test(this.order.phone)
+                        const phoneLength = this.customerDetails.phone.length >= 10;
+                        return phoneOrder.test(this.customerDetails.phone) && phoneLength;
                     },
 
                     isValidFirstName() {
                         const nameOrder = /^[A-Za-z-']+$/;
-                        return nameOrder.test(this.order.firstName);
+                        return nameOrder.test(this.customerDetails.firstName);
                     },
 
                     isValidLastName() {
                         const nameOrder = /^[A-Za-z-']+$/;
-                        return nameOrder.test(this.order.lastName);
+                        return nameOrder.test(this.customerDetails.lastName);
                     },
 
                     isValidName() {
                         return this.isValidFirstName() && this.isValidLastName();
                     },
-
-                    // checkoutEnabled() {
-                    //     return this.isValidName() && this.isValidPhone();
-                    // },
 
                     checkout () {
                         alert("Checkout complete!");
@@ -376,13 +389,18 @@
 
                         if (courseInCart) {
                             let courseInMainList = this.courses.find(
-                                function(sub) {
-                                    return sub.title === courseInCart.title;
+                                function(subj) {
+                                    return subj.title === courseInCart.title;
                             });
-                            courseInMainList.spacesAvailable += courseInCart.quantity;
+                            courseInMainList.spacesAvailable++; 
+                            
+                            courseInCart.quantity--;
+                            courseInCart.total= courseInCart.price * courseInCart.quantity;
 
-                            let cartIndex = this.cart.indexOf(courseInCart);
-                            this.cart.splice(cartIndex, 1);
+                            if(courseInCart === 0) {
+                              let cartIndex = this.cart.indexOf(courseInCart);
+                              this.cart.splice(cartIndex, 1);  
+                            }
                         }
                         
                         console.log(JSON.stringify(this.cart, null, 2));

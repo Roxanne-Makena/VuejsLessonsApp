@@ -1,6 +1,7 @@
 let courses = [
     {
         id: 1,
+        image: "./images/lessons/maths.jpg",
         title: "Maths",
         description: "Build your confidence in mathematical concepts and practical problem-solving.",
         location: "Hendon",
@@ -10,6 +11,7 @@ let courses = [
     },
     {
         id: 2,
+        image: "./images/lessons/business.jpg",
         title: "Business Management",
         description: "Learn how to plan, organise, and manage successful business operations.",
         location: "Cambridge",
@@ -19,6 +21,7 @@ let courses = [
     },
     {
         id: 3,
+        image: "./images/lessons/dataAnalytics.jpg",
         title: "Data Analytics",
         description: "Turn raw data into useful insights using analysis and visualisation techniques.",
         location: "Oxford",
@@ -28,6 +31,7 @@ let courses = [
     },
     {
         id: 4,
+        image: "./images/lessons/projectMgt.jpg",
         title: "Project Management",
         description: "Master the essentials of planning projects, managing resources, and meeting deadlines.",
         location: "Wembley",
@@ -37,6 +41,7 @@ let courses = [
     },
     {
         id: 5,
+        image: "./images/lessons/graphicDesign.jpg",
         title: "Graphic Design",
         description: "Explore typography, colour, and layout to create compelling visual designs.",
         location: "Stratford",
@@ -46,6 +51,7 @@ let courses = [
     },
     {
         id: 6,
+        image: "./images/lessons/cybersecurity.jpg",
         title: "Cybersecurity",
         description: "Discover how to identify digital threats and protect systems, networks, and data.",
         location: "Liverpool",
@@ -55,6 +61,7 @@ let courses = [
     },
     {
         id: 7,
+        image: "./images/lessons/entrepreneurship.jpg",
         title: "Entrepreneurship",
         description: "Learn how to develop business ideas and turn them into viable ventures.",
         location: "Bristol",
@@ -64,6 +71,7 @@ let courses = [
     },
     {
         id: 8,
+        image: "./images/lessons/finance.jpg",
         title: "Finance",
         description: "Understand budgeting, financial planning, and the fundamentals of investment.",
         location: "Birmingham",
@@ -73,6 +81,7 @@ let courses = [
     },
     {
         id: 9,
+        image: "./images/lessons/webDevelopment.jpg",
         title: "Web Development",
         description: "Learn to build interactive websites using HTML, CSS, and JavaScript.",
         location: "Manchester",
@@ -82,6 +91,7 @@ let courses = [
     },
     {
         id: 10,
+        image: "./images/lessons/uxDesign.jpg",
         title: "UX Design",
         description: "Design intuitive digital experiences by understanding users and their needs.",
         location: "Southampton",
@@ -91,6 +101,7 @@ let courses = [
     },
     {
         id: 11,
+        image: "./images/lessons/digitalMarketing.jpg",
         title: "Digital Marketing",
         description: "Discover how to reach audiences through social media, content, and digital campaigns.",
         location: "Buckingham",
@@ -100,6 +111,7 @@ let courses = [
     },
     {
         id: 12,
+        image: "./images/lessons/genAI.jpg",
         title: "Generative AI for Everyone",
         description: "Explore how generative AI works and how to apply it in everyday tasks.",
         location: "Reading",
